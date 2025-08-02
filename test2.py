@@ -1,14 +1,8 @@
+# Sliding Puzzle implimentation
 import numpy as np
 import random
 import copy
-import math
-import tensorflow as tf
 
-from tensorflow.keras import layers, models
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
-
-# Sliding Puzzle implimentation
 class SlidingPuzzle:
     """Class to represent a sliding puzzle game."""
     def __init__(self, size=3):
@@ -95,6 +89,18 @@ class SlidingPuzzle:
         for row in self.current_state:
             print("                    ",end="")
             print("  ".join(f"{x:3}" for x in row))
+            
+    def manhattan_distance(self):
+        distance = 0
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.current_state[i,j] != 0:  # Skip empty tile
+                    # Find where this number should be
+                    goal_pos = np.where(self.goal == self.current_state[i,j])
+                    goal_i, goal_j = goal_pos[0][0], goal_pos[1][0]
+                    # Add distance
+                    distance += abs(i - goal_i) + abs(j - goal_j)
+        return distance
         
     def up(self):
         """Move the empty tile up if possible."""
@@ -145,143 +151,10 @@ class SlidingPuzzle:
             print("Cannot move right, already at the rightmost column.")
             return None
         
-# Generate test data
-def generate_training_data(num_samples = 100, size = 3):
-    """Generate random sliding puzzle states for testing."""
-    print(f"Generating {num_samples} of training samples for {size}x{size} sliding puzzle...")
-    
-    puzzles = []
-    solutions = []
-    
-    puzzle_gen = SlidingPuzzle(size)
-    
-    for i in range(num_samples):
         
-        if i % 1000 == 0:
-            print(f"Generated {i}/{num_samples} samples...")
-        
-        
-        puzzle_gen.current_state, solution = puzzle_gen.create_puzzle_with_solution()
-        puzzles.append(puzzle_gen.current_state.flatten())
-        if len(solution) > 0:
-            solutions.append(solution[0])  # Just first move
-        else:
-            solutions.append('no_move') 
-    
-    puzzles = np.array(puzzles)
-    solutions = np.array(solutions)
-    print(f"Generated {num_samples} samples for {size}x{size} sliding puzzle.")
-    print(f"Sample puzzle: {puzzles[0]}")
-    print(f"Sample solution: {solutions[:5]}... (truncated)\n")
-    
-    return np.array(puzzles), solutions
-    
-def prepare_training_data(x,y):
-    """Prepare training data for the sliding puzzle."""
-    
-    # Convert puzzles to numpy arrays
-    x = np.array(x)
-    y = np.array(y)
-
-    #convert move strings to integers
-    move_encoder = LabelEncoder()
-    move_encoder.fit(['up', 'down', 'left', 'right', 'no_move'])
-
-    # Convert moves to integers
-    y_encoded = move_encoder.fit_transform(y)
-
-    print("Moves Encoding:")
-
-    for i,move in enumerate(['up', 'down', 'left', 'right', 'no_move']):
-        print(f"    {move} -> {i}")
-
-    print(f"\nData ready for encoding")
-    print(f"X shape: {x.shape}")
-    print(f"Y shape: {y_encoded.shape}\n")
-
-    return x, y_encoded, move_encoder
-    
-def create_puzzle_model():
-    """Create a simple NN for puzzle solving."""
-    
-    model =models.Sequential([
-        #input layer
-        layers.Dense(64, activation='relu', input_shape=(9,)),  # 3x3 puzzle flattened
-
-        #hidden layer
-        layers.Dense(64, activation='relu'),
-
-        #output layer
-        layers.Dense(5, activation='softmax')  # 5 possible moves
-    ])
-
-    model.compile(
-        optimizer='adam',
-        loss='sparse_categorical_crossentropy',
-        metrics=['accuracy']
-    )
-
-    return model
-
-def test_model_prediction(model, encoder):
-        """Test the model on a new puzzle"""
-        
-        # Create a test puzzle
-        test_puzzle = SlidingPuzzle(3)
-        puzzle_state, true_solution = test_puzzle.create_puzzle_with_solution()
-        
-        print("Test Puzzle:")
-        print(puzzle_state)
-        print(f"True first move: {true_solution[0] if true_solution else 'None'}")
-        
-        # Get model prediction
-        puzzle_input = puzzle_state.flatten().reshape(1, -1)  # Reshape for model
-        prediction = model.predict(puzzle_input, verbose=0)
-        
-        # Convert prediction to move
-        predicted_move_num = prediction[0].argmax()  # Get highest probability
-        predicted_move = encoder.inverse_transform([predicted_move_num])[0]
-        confidence = prediction[0][predicted_move_num]
-        
-        print(f"Model prediction: {predicted_move} (confidence: {confidence:.2%})")
-
-    
-
 if __name__ == "__main__":
-        X, Y = generate_training_data(10000,3)
-        X_prepared, Y_prepared, encoder = prepare_training_data(X, Y)
-        print("Training data prepared successfully.")
-
-        model = create_puzzle_model()
-        print("Model created successfully.")
-
-        print("Training model...")
-        x_train, x_test, y_train, y_test = train_test_split(X_prepared, Y_prepared, test_size=0.2, random_state=42)
-        
-        history = model.fit(
-            x_train, y_train,
-            epochs=100,
-            batch_size=32,
-            validation_data=(x_test, y_test)
-        )
-
-        print("Model training completed.")
-
-        # Test the trained model
-        test_loss, test_accuracy = model.evaluate(x_test, y_test, verbose=0)
-
-        print(f"\nModel Performance:")
-        print(f"Test Accuracy: {test_accuracy:.2%}")
-        print(f"Test Loss: {test_loss:.3f}")
-
-
-        # Test the model
-        test_model_prediction(model, encoder)
-
-        # Look at first few examples
-        # print("First 5 training examples:")
-        # for i in range(5):
-        #     puzzle = X_prepared[i]
-        #     move_num = Y_prepared[i]
-        #     move_name = encoder.inverse_transform([move_num])[0]
-        #     print(f"Puzzle: {puzzle} -> Move: {move_name}")
+    puzzle = SlidingPuzzle(3)
+    puzzle.goalState()
+    puzzle.currentState()
+    
+    print("Manhattan Distance:", puzzle.manhattan_distance())
