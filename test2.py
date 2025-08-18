@@ -6,6 +6,9 @@ import copy
 =======
 import math
 from sklearn.preprocessing import _encoders
+<<<<<<< Updated upstream:test2.py
+>>>>>>> Stashed changes:test1.py
+=======
 >>>>>>> Stashed changes:test1.py
 
 class SlidingPuzzle:
