@@ -79,6 +79,8 @@ class SlidingPuzzle:
                 puzzle[empty_row, empty_col], puzzle[empty_row, empty_col+1] = puzzle[empty_row, empty_col+1], puzzle[empty_row, empty_col]
                 empty_col += 1
                 
+            #!!!!!!!!! Here Target move seems ineffective as it can generate redundent moves.
+                
             # Calculate Manhattan distance for the final state
             distance = self.manhattan_distance(puzzle)
             distance_log.append(distance)
