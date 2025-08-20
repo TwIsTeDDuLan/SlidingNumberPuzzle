@@ -106,11 +106,47 @@ def prepare_training_data(training_data):
     return x_prepared, y_prepared, target_moves_encoder
 
 
+def create_puzzle_model():
+    model = models.Sequential([
+        layers.Dense(128, activation='relu', input_shape=(10,)),
+        layers.Dense(64, activation='relu'),
+        layers.Dense(4, activation='softmax')
+    ])
+    
+    model.compile(
+        optimizer='adam',
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    
+    return model
+
 
 if __name__ == "__main__":
-    puzzle = SlidPuzzleTraingData(3,5)
+    puzzle = SlidPuzzleTraingData(3,1000)
     x , y, encoder = prepare_training_data(puzzle.training_data)
 
+    model = create_puzzle_model()
+    print("Model created successfully.")
+    
+    print("Training model...")
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    
+    history = model.fit(
+        x_train, y_train,
+        validation_data=(x_test, y_test),
+        epochs=100,
+        batch_size=32
+    )
+    print("Model training completed.")
+    
+    test_loss, test_accuracy = model.evaluate(x_test, y_test, verbose=2)
+    
+    print(f"\nModel Performance:")
+    print(f"Test Accuracy: {test_accuracy:.2%}")
+    print(f"Test Loss: {test_loss:.3f}")
+          
+          
     # print("Training Data:")
     # for data in puzzle.training_data:
     #      print(data[0])
