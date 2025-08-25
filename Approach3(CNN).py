@@ -77,40 +77,64 @@ class SlidPuzzleTraingData():
 
         return training_data
 
+from tensorflow.keras.utils import to_categorical
 
 def prepare_training_data(training_data):
-    # This function will prepare the training data for the model
     x_prepared = []
     y_prepared = []
-    y=[]
+    y = []
     
     for data in training_data:
-        x = np.hstack((data[0], data[2]))  # Puzzle state and Manhattan distance
-        x_prepared.append(x)  # Append the prepared state
+        # 1. One-Hot Encode the puzzle state
+        # data[0] is the flat array of 9 integers
+        puzzle_state = data[0].astype(int)
+        # Reshape back to 3x3 and then one-hot encode. 
+        # The number of classes is 9 (tiles 1-8 and 0). 
+        # '9' is used because to_categorical expects values from 0 to n_classes-1.
+        one_hot_state = to_categorical(puzzle_state, num_classes=9) 
+        # This gives a (9, 9) shape. Reshape it to (3, 3, 9) to get the spatial structure back.
+        one_hot_state = one_hot_state.reshape((3, 3, 9))
+        
+        print(one_hot_state)
+        
+        x_prepared.append(one_hot_state)
         y.append(data[1])  # Target move
 
-    x_prepared = np.array(x_prepared)  
-    y = np.array(y)  # Convert target moves to numpy array
+    x_prepared = np.array(x_prepared)  # Shape will be (num_samples, 3, 3, 9)
+    y = np.array(y)
     
     target_moves_encoder = LabelEncoder()
     target_moves_encoder.fit(['up', 'down', 'left', 'right'])
-    y_prepared = target_moves_encoder.transform(y)  # Encode target moves 
+    y_prepared = target_moves_encoder.transform(y)
     
     print("Prepared training data.")
-    for i,move in enumerate(['up', 'down', 'left', 'right']):
-        print(f'{move} -> {i}')
-    
-    print(f"X_combined shape: {x_prepared.shape}")  # Should be (num_samples, 10)
+    print(f"X (one-hot encoded) shape: {x_prepared.shape}")  # e.g., (1000, 3, 3, 9)
     print(f"Y_encoded shape: {y_prepared.shape}")
     
     return x_prepared, y_prepared, target_moves_encoder
 
-
-def create_puzzle_model():
+def create_puzzle_model(input_shape=(3, 3, 9)):
     model = models.Sequential([
-        layers.Dense(64, activation='relu', input_shape=(10,)),
+        # First Convolutional Block: Learns basic local patterns
+        layers.Conv2D(64, (2, 2), activation='relu', input_shape=input_shape),
+        layers.BatchNormalization(), # Helps stabilize and speed up training
+        layers.Activation('relu'),
+        
+        # Second Convolutional Block: Learns more complex patterns
+        layers.Conv2D(128, (2, 2), activation='relu'),
+        layers.BatchNormalization(),
+        layers.Activation('relu'),
+        
+        # Flatten the feature maps to connect to Dense layers
+        layers.Flatten(),
+        
+        # Dense layers for making the final decision
         layers.Dense(128, activation='relu'),
+        layers.Dropout(0.3), # Helps prevent overfitting
         layers.Dense(64, activation='relu'),
+        layers.Dropout(0.2),
+        
+        # Output layer: 4 neurons for the 4 possible moves
         layers.Dense(4, activation='softmax')
     ])
     
@@ -120,6 +144,7 @@ def create_puzzle_model():
         metrics=['accuracy']
     )
     
+    model.summary() # Very useful to see the architecture
     return model
 
 
