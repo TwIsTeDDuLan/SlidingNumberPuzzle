@@ -1,0 +1,12 @@
+body{
+    background-color: rgb(65, 63, 63);
+}
+
+.container{
+    display: grid;
+    grid-template-rows: 2fr,3fr,1fr;
+}
+
+.StartBtn {
+
+}
