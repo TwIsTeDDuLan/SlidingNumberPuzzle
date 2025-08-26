@@ -13,24 +13,27 @@
                 <h1>SlidingPuzzle</h1>
             </div>
             <div class="controls">
-                <div class="StartBtn">
-                    <button onclick="StartGame()">Start Game</button>
+                <div class="aura">
+                    <span class="aura-radiate"></span>
+                    <span class="aura-radiate"></span>
+                    <span class="aura-radiate"></span>
+                    <span class="aura-radiate"></span>
+                    <div class="StartBtn">
+                        <button onclick="StartGame()">Start Game</button>
+                    </div>
                 </div>
                 <div class="SizeSelector">
-                    <label for="sizeSelect">Select Size:</label>
-                    <select id="sizeSelect" onchange="changeSize()">
+                    <label for="sizeSelect">Select Size :</label>
+                    <select id="sizeSelect">
                         <option value="3">3x3</option>
                         <option value="4" selected>4x4</option>
                         <option value="5">5x5</option>
                         <option value="6">6x6</option>
                     </select>
-            </div>
-            <div class="puzzle-container" id="puzzleContainer">
-                <!-- Puzzle pieces will be dynamically added here -->
+                </div>
             </div>
             <div class="footer">
                 <p>&copy; 2024 SlidingPuzzle. All rights reserved.</p>
             </div>
-        </div>
     </body>
 </html>
