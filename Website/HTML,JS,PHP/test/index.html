@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="EN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <style>
+        body{
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .black-box {
+            display: none;
+            width: 50vw;
+            height: 50vh;
+            background-color: rgba(49, 133, 250, 0.436);
+            border-radius: 20px;
+            transform: scale(2);
+            transition: transform 0.5s ease-out;
+        }
+    </style>
+    <body>
+        <button onclick="apear()" id="click">CLICK!</button>
+        <div class="black-box"></div>
+        <script>
+            function apear(){
+                const btn = document.getElementById('click');
+                const box = document.querySelector('.black-box');
+                btn.style.display = 'none';
+                box.style.display = 'flex';
+                void box.offsetWidth;
+                box.style.transform = 'scale(1)';
+            }
+        </script>
+    </body>
+</html>
