@@ -1,0 +1,130 @@
+.header-game{
+    width: 100%;
+    text-align: center;
+    font-size: 25px;
+    color: #00c6ff;
+    text-shadow: 0 2px 8px rgba(0,198,255,0.3);
+}
+
+
+.play-area {
+    display: none; /*grid*/
+    width: 100vw;
+    grid-template-columns: 1fr auto 1fr; /* Left stats, center board, right ml-assist */
+    gap: 2rem;
+    align-items: start;
+    padding: 1rem;
+}
+
+.stats, .ml-assist {
+    display: none;/*flex*/
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.time, .moves, .retry, .ml-assist {
+    width: 6rem;
+    height: 6rem;
+    margin: 0 auto;
+    
+    /* Center content vertically */
+    display: none;/*flex*/
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    border-radius: 32px;
+    border: 2px solid white;
+    color: white;
+    font-size: 20px;
+    text-align: center;
+}
+
+.retry {
+    width: 8rem;
+    height: 5rem;
+    border-radius: 25px;
+    background:linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+
+    font-size: 25px;
+    font-weight: 900;
+}
+
+.retry:hover {
+    background: linear-gradient(120deg, #e0f7fa 0%, #fff 100%);
+    color: #00c6ff;
+    transform: scale(1.08);
+    box-shadow: 0 8px 32px #00c6ff44;
+    border-color: #00c6ff;
+}
+
+.retry:active {
+    background: linear-gradient(120deg, #00c6ff 0%, #e0f7fa 100%);
+    color: #fff;
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px #0072ff44;
+    border-color: #0072ff;
+}
+
+.ml-assist {
+    height: 80%;
+    width: 80%;
+}
+
+.board {
+    width: 30rem;
+    height: 30rem;
+    background: linear-gradient(180deg, #0072ff 0%, #00c6ff 100%);
+    border-radius: 32px;
+    box-shadow: 0 8px 32px rgba(0,198,255,0.18), 0 2px 8px #232526;
+    display: none;/*grid*/
+    gap: 16px 16px;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 2rem;
+    position: relative;
+}
+
+.board > div{
+    display: none;/*flex*/
+    border-radius: 24px;
+    padding: 1.2rem;
+    justify-content: center;
+    align-items: center;
+    font-size: 80px;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(0,198,255,0.10), 0 1px 4px #232526;
+    transition: transform 0.18s cubic-bezier(.4,2,.3,1), box-shadow 0.18s, background 0.18s;
+    cursor: pointer;
+}
+
+.board > div.tile{
+    background: linear-gradient(120deg, #fff 60%, #e0f7fa 100%);
+    color: #0072ff;
+    box-shadow: 0 2px 12px #00c6ff33;
+    border: 2px solid #00c6ff;
+}
+
+.board > div.tile:hover {
+    background: linear-gradient(120deg, #e0f7fa 0%, #fff 100%);
+    color: #00c6ff;
+    transform: scale(1.08);
+    box-shadow: 0 8px 32px #00c6ff44;
+    border-color: #00c6ff;
+}
+
+.board > div.tile:active {
+    background: linear-gradient(120deg, #00c6ff 0%, #e0f7fa 100%);
+    color: #fff;
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px #0072ff44;
+    border-color: #0072ff;
+}
+
+.board > div.null{
+    background: transparent;
+    border: 10px dashed #ffffffb2;
+    box-shadow: none;
+}
