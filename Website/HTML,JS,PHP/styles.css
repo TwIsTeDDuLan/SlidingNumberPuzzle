@@ -24,6 +24,7 @@ body, html {
     margin-top: 1rem;
     color: #00c6ff;
     text-shadow: 0 2px 8px rgba(0,198,255,0.3);
+    transition: margin-top 0.5s ease-in-out;
 }
 
 .controls {
@@ -41,30 +42,11 @@ body, html {
     color: #e0e0e0;
 }
 
-.StartBtn {
-    width: 100%;
-}
-
-.StartBtn{
-    padding: 30px 40px;
-    font-size: 25px;
-    background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
-    color: #fff;
-    border: 2px solid #fff;
-    border-radius: 20px;
-    box-shadow: 0 4px 16px rgba(0,198,255,0.15);
-    cursor: pointer;
-    transition: background 0.3s, box-shadow 0.3s;
-}
-
-.StartBtn :hover {
-    background: linear-gradient(180deg, #0072ff 0%, #00c6ff 100%);
-    box-shadow: 0 8px 32px rgba(0,198,255,0.25);
-}
-
 .SizeSelector {
     margin-top: 2rem;
     color: #e0e0e0;
+    opacity: 1;
+    transition: opacity 0.5s ease;
 }
 
 .SizeSelector label {
@@ -80,6 +62,35 @@ body, html {
     padding: 10px;
     font-size: 16px;
     box-shadow: 0 2px 8px rgba(0,198,255,0.08);
+}
+
+.StartBtn {
+    width: 100%;
+}
+
+.StartBtn button{
+    padding: 30px 40px;
+    font-size: 25px;
+    background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 32px;
+    box-shadow: 0 4px 16px rgba(0,198,255,0.15);
+    cursor: pointer;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+.StartBtn button:active{
+    background: linear-gradient(120deg, #00c6ff 0%, #e0f7fa 100%);
+    color: #fff;
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px #0072ff44;
+    border-color: #0072ff;
+}
+
+.StartBtn button:hover {
+    background: linear-gradient(180deg, #0072ff 0%, #00c6ff 100%);
+    box-shadow: 0 8px 32px rgba(0,198,255,0.25);
 }
 
 /* Add this keyframes rule */
@@ -107,7 +118,7 @@ body, html {
 /* Your existing aura styles (fixed) */
 .aura {
     position: relative;
-    border-radius: 30px;
+    border-radius: 32px;
     box-shadow: 0 4px 32px rgba(0,198,255,0.12);
     overflow: visible;
 }
