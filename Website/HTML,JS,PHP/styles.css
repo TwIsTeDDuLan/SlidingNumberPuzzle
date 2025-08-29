@@ -71,6 +71,7 @@ body, html {
 .StartBtn button{
     padding: 30px 40px;
     font-size: 25px;
+    font-weight: 700;
     background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
     color: #fff;
     border: 2px solid #fff;
