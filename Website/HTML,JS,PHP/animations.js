@@ -1,5 +1,6 @@
-//elements
+//export {shuffledPuzzle};
 
+//elements
 const playArea = document.querySelector('.play-area');
 const stat = document.querySelector('.stats');
 const mlAssist = document.querySelector('.ml-assist');
