@@ -1,5 +1,3 @@
-//export {shuffledPuzzle};
-
 //elements
 const playArea = document.querySelector('.play-area');
 const stat = document.querySelector('.stats');
@@ -16,12 +14,14 @@ const startBtnCls = document.querySelector('.aura');
 const startBtn = document.getElementById('start');
 const sizeSelector = document.querySelector('.SizeSelector');
 const tiles = document.querySelectorAll('.board > div');
+const moveCount = document.querySelector('.moves');
 
 
 
 function StartGame(){
+    const noMoves = 0;
     const sizeSelect = document.getElementById('sizeSelect');
-    const selectedSize = parseInt(sizeSelect.value) || 3;
+    selectedSize = parseInt(sizeSelect.value) || 3;
     
 
     //disapearences
@@ -50,11 +50,6 @@ function StartGame(){
 
 function toggleTiles(selectedSize) {
     const tiles = document.querySelectorAll('.board > div');
-    const tile = document.querySelectorAll('.board > div.tile');
-    const tileHover = document.querySelectorAll('.board > div.tile:hover');
-    const tileActive = document.querySelectorAll('.board > div.tile:active');
-    const nullTile = document.querySelectorAll('.board > div.null');
-
 
     tiles.forEach((tile) => {
             tile.style.display = 'flex';
@@ -196,26 +191,155 @@ function findIndex2D(array, target) {
     return [-1, -1]; // Return [-1, -1] if not found
 }
 
-function moveUP(row, col, puzzle){
-    const newRow = row - 1;
-    const newCol = col;
+function updateTileDOM(row, col, value) {
+    // Calculate the index in the flat array
+    const size = puzzle.length;
+    const index = row * size + col;
+    
+    // Get the tile element
+    const tile = document.querySelectorAll('.board > div')[index];
+    
+    if (value !== 0) {
+        tile.className = 'tile';
+        tile.dataset.value = value;
+        tile.textContent = value;
+    } else {
+        tile.className = 'null';
+        tile.dataset.value = '0';
+        tile.textContent = '';
+    }
+}
+
+function moveUP(puzzle) {
+    let [row, col] = findIndex2D(puzzle, 0);
+    let newRow = row - 1;
+    let newCol = col;
+    
     if (newRow >= 0) {
+        // Store the value that will move into the empty space
+        const movingValue = puzzle[newRow][newCol];
+        
+        // Swap in the array
         [puzzle[row][col], puzzle[newRow][newCol]] = [puzzle[newRow][newCol], puzzle[row][col]];
+        
+        // Update the DOM
+        updateTileDOM(row, col, puzzle[row][col]); // Now contains the moved value
+        updateTileDOM(newRow, newCol, puzzle[newRow][newCol]); // Now contains 0 (empty)
+    }
+}
+
+function moveDOWN(puzzle) {
+    let [row, col] = findIndex2D(puzzle, 0);
+    const newRow = row + 1;
+    const newCol = col;
+
+    // Check if move is valid BEFORE accessing array
+    if (newRow < puzzle.length) {
+        [puzzle[row][col], puzzle[newRow][newCol]] = [puzzle[newRow][newCol], puzzle[row][col]];
+
+        // Update the DOM
+        updateTileDOM(row, col, puzzle[row][col]); // Now contains the moved value
+        updateTileDOM(newRow, newCol, puzzle[newRow][newCol]); // Now contains 0 (empty)
     }
 
-    const upTile = document.querySelector(`.tile[data-value='${puzzle[newRow][newCol]}']`);
-    upTile.style.backgroundColor = 'red';
 }
 
-function moveDOWN(){
+function moveRIGHT(puzzle){
+    let [row, col] = findIndex2D(puzzle, 0);
+    let newRow = row;
+    let newCol = col + 1;
+    if (newCol < puzzle.length) {
+        [puzzle[row][col], puzzle[newRow][newCol]] = [puzzle[newRow][newCol], puzzle[row][col]];
+
+        updateTileDOM(row, col, puzzle[row][col]); // Now contains the moved value
+        updateTileDOM(newRow, newCol, puzzle[newRow][newCol]); // Now contains 0 (empty)
+    }
 
 }
 
-function moveRIGHT(){
+function moveLEFT(puzzle){
+    let [row, col] = findIndex2D(puzzle, 0);
+    let newRow = row;
+    let newCol = col - 1;
+    if (newCol >= 0) {
+        [puzzle[row][col], puzzle[newRow][newCol]] = [puzzle[newRow][newCol], puzzle[row][col]];
 
+        updateTileDOM(row, col, puzzle[row][col]); // Now contains the moved value
+        updateTileDOM(newRow, newCol, puzzle[newRow][newCol]); // Now contains 0 (empty)
+    }
 }
 
-function moveLEFT(){
+function availableMoves(puzzle) {
+    let moves = [];
+    let [row, col] = findIndex2D(puzzle, 0);
     
+    // UP: row-1, col (check if row > 0)
+    if (row > 0) moves.push(puzzle[row-1][col]);
+    
+    // DOWN: row+1, col (check if row < selectedSize-1)
+    if (row < selectedSize-1) moves.push(puzzle[row+1][col]);
+    
+    // LEFT: row, col-1 (check if col > 0)
+    if (col > 0) moves.push(puzzle[row][col-1]);
+    
+    // RIGHT: row, col+1 (check if col < selectedSize-1)
+    if (col < selectedSize-1) moves.push(puzzle[row][col+1]);
+    
+    return moves;
 }
 
+
+const tile = document.querySelectorAll('.board > div.tile');
+    const tileHover = document.querySelectorAll('.board > div.tile:hover');
+    const tileActive = document.querySelectorAll('.board > div.tile:active');
+    const nullTile = document.querySelectorAll('.board > div.null');
+
+document.addEventListener('DOMContentLoaded', () => {
+    const board = document.querySelector('.board');
+    if (board) {
+        board.addEventListener('mouseover', function(event){
+            // Check if hovered element is a tile
+            if (event.target.classList.contains('tile')) {
+                const tileValue = event.target.dataset.value;
+                const ablebMoves = availableMoves(shuffledPuzzle);
+                console.log(ablebMoves);
+                if (!ablebMoves.includes(parseInt(tileValue))) {
+                    event.target.classList.add('tile-cant');
+                }
+            }
+        });
+
+        board.addEventListener('click', function(event) {
+            // Check if clicked element is a tile
+            if (event.target.classList.contains('tile')) {
+                const tileValue = event.target.dataset.value;
+                const [row, col] = findIndex2D(puzzle, parseInt(tileValue));
+                const possibleMoves = availableMoves(shuffledPuzzle);
+                let moved = false;
+
+                if (possibleMoves.includes(parseInt(tileValue))) {
+                    if (row > 0 && puzzle[row - 1][col] === 0) {
+                        moveDOWN(shuffledPuzzle);
+                        moved = true;
+                    } else if (row < selectedSize - 1 && puzzle[row + 1][col] === 0) {
+                        moveUP(shuffledPuzzle);
+                        moved = true;
+                    } else if (col > 0 && puzzle[row][col - 1] === 0) {
+                        moveRIGHT(shuffledPuzzle);
+                        moved = true;
+                    } else if (col < selectedSize - 1 && puzzle[row][col + 1] === 0) {
+                        moveLEFT(shuffledPuzzle);
+                        moved = true;
+                    }
+
+                    if (moved) {
+                        noMoves += 1;
+                        moveCount.textContent = `Moves: ${noMoves}`;
+                    }
+                }
+
+
+            }
+        });
+    }
+});
