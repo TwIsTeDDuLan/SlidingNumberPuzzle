@@ -3,6 +3,8 @@ const playArea = document.querySelector('.play-area');
 const stat = document.querySelector('.stats');
 const mlAssist = document.querySelector('.ml-assist');
 const timeC = document.querySelector('.time');
+const BtimeC = document.querySelector('.best-time');
+const Bmoves = document.querySelector('.best-moves');
 const moves = document.querySelector('.moves');
 const retry = document.querySelector('.retry');
 const board = document.querySelector('.board');/*board > div here as well*/
@@ -19,7 +21,8 @@ const moveCount = document.querySelector('.moves');
 
 
 function StartGame(){
-    const noMoves = 0;
+    noMoves = 0;
+    moveCount.textContent = 'Moves: 0';
     const sizeSelect = document.getElementById('sizeSelect');
     selectedSize = parseInt(sizeSelect.value) || 3;
     
@@ -35,6 +38,8 @@ function StartGame(){
     stat.style.display = 'flex';
     mlAssist.style.display = 'flex';
     timeC.style.display = 'flex';
+    BtimeC.style.display = 'flex';
+    Bmoves.style.display = 'flex';
     moves.style.display = 'flex';
     retry.style.display = 'flex';
     board.style.display = 'grid';
@@ -43,9 +48,13 @@ function StartGame(){
     board.style.transform = 'scale(1)';
     timeC.style.transform = 'scale(1)';
     moves.style.transform = 'scale(1)';
+    BtimeC.style.transform = 'scale(1)';
+    Bmoves.style.transform = 'scale(1)';
     retry.style.transform = 'scale(1)';
     mlAssist.style.transform = 'scale(1)';
     setTimeout(createBoard(selectedSize), 500);
+
+    
 }
 
 function toggleTiles(selectedSize) {
@@ -290,9 +299,9 @@ function availableMoves(puzzle) {
 
 
 const tile = document.querySelectorAll('.board > div.tile');
-    const tileHover = document.querySelectorAll('.board > div.tile:hover');
-    const tileActive = document.querySelectorAll('.board > div.tile:active');
-    const nullTile = document.querySelectorAll('.board > div.null');
+const tileHover = document.querySelectorAll('.board > div.tile:hover');
+const tileActive = document.querySelectorAll('.board > div.tile:active');
+const nullTile = document.querySelectorAll('.board > div.null');
 
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.querySelector('.board');
@@ -301,15 +310,30 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if hovered element is a tile
             if (event.target.classList.contains('tile')) {
                 const tileValue = event.target.dataset.value;
-                const ablebMoves = availableMoves(shuffledPuzzle);
-                console.log(ablebMoves);
+                const ablebMoves = availableMoves(puzzle);
                 if (!ablebMoves.includes(parseInt(tileValue))) {
                     event.target.classList.add('tile-cant');
                 }
             }
         });
 
+        board.addEventListener('mouseout', function(event){
+            // Check if mouse out on mouse
+            if (event.target.classList.contains('tile')) {
+                const tileValue = event.target.dataset.value;
+                const ablebMoves = availableMoves(puzzle);
+                if (!ablebMoves.includes(parseInt(tileValue))) {
+                    event.target.classList.remove('tile-cant');
+                }
+            }
+        });
+
         board.addEventListener('click', function(event) {
+            // check if the puzzle is solved or not
+            const tile = document.querySelectorAll('.board > div.tile');
+            tile.forEach(tile => console.log(tile));
+            console.log(tile[0]);
+
             // Check if clicked element is a tile
             if (event.target.classList.contains('tile')) {
                 const tileValue = event.target.dataset.value;
@@ -331,7 +355,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         moveLEFT(shuffledPuzzle);
                         moved = true;
                     }
-
                     if (moved) {
                         noMoves += 1;
                         moveCount.textContent = `Moves: ${noMoves}`;

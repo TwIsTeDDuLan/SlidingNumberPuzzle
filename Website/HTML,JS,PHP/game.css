@@ -103,7 +103,7 @@
     height: 100%;
 }
 
-.time, .moves, .retry, .ml-assist {
+.time, .moves, .retry, .ml-assist, .best-moves, .best-time {
     width: 6rem;
     height: 6rem;
     margin: 0 auto;
@@ -122,6 +122,8 @@
     transform: scale(0.1);
     transition: transform 0.5s ease-out;
 }
+
+
 
 .retry {
     width: 8rem;
