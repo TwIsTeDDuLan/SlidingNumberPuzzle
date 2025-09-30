@@ -2,14 +2,9 @@
 import numpy as np
 import random
 import copy
-<<<<<<< Updated upstream:test2.py
-=======
 import math
 from sklearn.preprocessing import _encoders
-<<<<<<< Updated upstream:test2.py
->>>>>>> Stashed changes:test1.py
-=======
->>>>>>> Stashed changes:test1.py
+
 
 class SlidingPuzzle:
     """Class to represent a sliding puzzle game."""

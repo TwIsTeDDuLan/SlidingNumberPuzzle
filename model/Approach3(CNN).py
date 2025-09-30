@@ -10,7 +10,6 @@ from sklearn.model_selection import train_test_split
 
 
 class SlidPuzzleTraingData():
-    """Approach 2 aims to provide puzzle state, manhattan distance, and target move to the model"""
     
     def __init__(self, size=3,size_of_training_data=1000):
         self.size = size
