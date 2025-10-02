@@ -160,7 +160,7 @@ class SlidPuzzleTraingData():
         return balanced_data
     
 if __name__=="__main__":
-    puzle = SlidPuzzleTraingData(3,5000)
+    puzle = SlidPuzzleTraingData(3,50000)
     l,r,d,u,n = 0,0,0,0,0
     for i in puzle.balanced_data:
         if i[1]=='left':

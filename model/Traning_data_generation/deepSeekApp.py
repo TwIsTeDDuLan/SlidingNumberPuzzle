@@ -271,7 +271,7 @@ class SlidPuzzleTraingData():
 
 if __name__ == "__main__":
     start_time = time.time()
-    puzzle = SlidPuzzleTraingData(3, 5000)
+    puzzle = SlidPuzzleTraingData(3, 10000,False)
     end_time = time.time()
     
     print(f"Data generation took {end_time - start_time:.2f} seconds")

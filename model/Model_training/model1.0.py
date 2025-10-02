@@ -61,7 +61,7 @@ print(f"Test accuracy: {test_acc:.4f}")
 
 
 # Save model
-#model.save("puzzle_solver_ann.keras")
+model.save("puzzle_solver_ann(My).keras")
 
 from sklearn.metrics import confusion_matrix, classification_report
 
