@@ -7,7 +7,7 @@ from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 
-training_data = pd.read_csv('balanced_training_data50KdeepSeek.csv')
+training_data = pd.read_csv('balanced_training_data50KdeepSeekv2.csv')
 training_data = training_data.dropna(subset=['target_move'])
 
 training_data['puzzle_state'] = training_data['puzzle_state'].apply(lambda x: np.array(x.split(' ')).astype(np.int8))
@@ -50,7 +50,7 @@ y = training_data['target_move_encoded'].values
 y_cat = to_categorical(y, num_classes=OUTPUT_SIZE)
 
 # Split before training
-X_train, X_test, y_train, y_test = train_test_split(X, y_cat, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y_cat, test_size=0.4, random_state=42)
 
 # Train only on train data
 model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.2)
