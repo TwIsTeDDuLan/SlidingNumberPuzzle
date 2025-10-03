@@ -129,6 +129,7 @@ class SlidingPuzzleGame:
         self.screen.blit(title, (self.width // 2 - title.get_width() // 2, 10))
         
         # Draw board
+        board_bottom = self.board_top + self.size * (self.tile_size + self.margin)
         for row in range(self.size):
             for col in range(self.size):
                 value = self.board[row, col]
@@ -137,10 +138,10 @@ class SlidingPuzzleGame:
                 
                 if value == 0:  # Empty tile
                     pygame.draw.rect(self.screen, self.EMPTY_COLOR, 
-                                   (x, y, self.tile_size, self.tile_size))
+                                (x, y, self.tile_size, self.tile_size))
                 else:
                     pygame.draw.rect(self.screen, self.TILE_COLOR, 
-                                   (x, y, self.tile_size, self.tile_size))
+                                (x, y, self.tile_size, self.tile_size))
                     
                     # Draw number
                     font = pygame.font.Font(None, 36)
@@ -148,61 +149,92 @@ class SlidingPuzzleGame:
                     text_rect = text.get_rect(center=(x + self.tile_size // 2, y + self.tile_size // 2))
                     self.screen.blit(text, text_rect)
         
-        # Draw moves counter
+        # Draw moves counter (below the board)
+        moves_y = board_bottom + 20
         moves_text = font.render(f"Moves: {self.moves}", True, (0, 0, 0))
-        self.screen.blit(moves_text, (20, self.board_top + self.size * (self.tile_size + self.margin) + 20))
+        self.screen.blit(moves_text, (20, moves_y))
         
-        # Draw AI prediction
+        # Draw AI prediction (to the right of moves counter)
         if self.ai_prediction:
             pred_font = pygame.font.Font(None, 24)
             move_text = pred_font.render(f"AI suggests: {self.ai_prediction['move']}", True, self.PREDICTION_COLOR)
-            self.screen.blit(move_text, (200, self.board_top + self.size * (self.tile_size + self.margin) + 20))
+            self.screen.blit(move_text, (200, moves_y))
             
-            # Draw probabilities
-            prob_y = self.board_top + self.size * (self.tile_size + self.margin) + 50
+            # Draw probabilities below the AI suggestion
+            prob_y = moves_y + 30
+            prob_x = 20  # Left align probabilities
+            
+            # Draw probabilities in a cleaner format
+            prob_title = pred_font.render("Probabilities:", True, (0, 0, 0))
+            self.screen.blit(prob_title, (prob_x, prob_y))
+            
+            prob_y += 25
             for move, prob in self.ai_prediction['probabilities'].items():
-                prob_text = pred_font.render(f"{move}: {prob:.2f}", True, (0, 0, 0))
-                self.screen.blit(prob_text, (20, prob_y))
+                prob_text = pred_font.render(f"  {move}: {prob:.2f}", True, (0, 0, 0))
+                self.screen.blit(prob_text, (prob_x, prob_y))
                 prob_y += 25
         
-        # Draw buttons
-        pygame.draw.rect(self.screen, self.BUTTON_COLOR, (50, 400, 100, 40))
-        pygame.draw.rect(self.screen, self.BUTTON_COLOR, (170, 400, 100, 40))
-        pygame.draw.rect(self.screen, self.BUTTON_COLOR, (290, 400, 100, 40))
+        # Draw buttons (below everything else)
+        buttons_top = board_bottom + 180  # Increased space for probabilities
+        button_width, button_height = 100, 40
+        button_spacing = 20
         
+        # Reset button
+        reset_rect = pygame.Rect(50, buttons_top, button_width, button_height)
+        pygame.draw.rect(self.screen, self.BUTTON_COLOR, reset_rect)
+        
+        # AI Move button
+        ai_rect = pygame.Rect(50 + button_width + button_spacing, buttons_top, button_width, button_height)
+        pygame.draw.rect(self.screen, self.BUTTON_COLOR, ai_rect)
+        
+        # Shuffle button
+        shuffle_rect = pygame.Rect(50 + 2 * (button_width + button_spacing), buttons_top, button_width, button_height)
+        pygame.draw.rect(self.screen, self.BUTTON_COLOR, shuffle_rect)
+        
+        # Button labels
         button_font = pygame.font.Font(None, 24)
         reset_text = button_font.render("Reset", True, self.TEXT_COLOR)
         ai_text = button_font.render("AI Move", True, self.TEXT_COLOR)
         shuffle_text = button_font.render("Shuffle", True, self.TEXT_COLOR)
         
-        self.screen.blit(reset_text, (75, 410))
-        self.screen.blit(ai_text, (195, 410))
-        self.screen.blit(shuffle_text, (305, 410))
+        self.screen.blit(reset_text, (reset_rect.centerx - reset_text.get_width() // 2, 
+                                    reset_rect.centery - reset_text.get_height() // 2))
+        self.screen.blit(ai_text, (ai_rect.centerx - ai_text.get_width() // 2, 
+                                ai_rect.centery - ai_text.get_height() // 2))
+        self.screen.blit(shuffle_text, (shuffle_rect.centerx - shuffle_text.get_width() // 2, 
+                                    shuffle_rect.centery - shuffle_text.get_height() // 2))
         
-        # Draw victory message
+        # Draw victory message (centered below buttons)
         if self.is_solved():
             victory_font = pygame.font.Font(None, 48)
             victory_text = victory_font.render("Puzzle Solved!", True, (0, 150, 0))
-            self.screen.blit(victory_text, (self.width // 2 - victory_text.get_width() // 2, 350))
+            victory_y = buttons_top + button_height + 30
+            self.screen.blit(victory_text, (self.width // 2 - victory_text.get_width() // 2, victory_y))
     
     def handle_click(self, pos):
         """Handle mouse clicks"""
         x, y = pos
         
-        # Check button clicks
-        if 400 <= y <= 440:
+        # Button positions (updated to match new layout)
+        buttons_top = self.board_top + self.size * (self.tile_size + self.margin) + 180
+        button_height = 40
+        
+        if buttons_top <= y <= buttons_top + button_height:
+            button_width = 100
+            button_spacing = 20
+            
             if 50 <= x <= 150:  # Reset button
                 self.reset_game()
                 return
-            elif 170 <= x <= 270:  # AI Move button
+            elif 170 <= x <= 270:  # AI Move button (50 + 100 + 20)
                 prediction = self.get_ai_prediction()
                 self.make_move(prediction['move'])
                 return
-            elif 290 <= x <= 390:  # Shuffle button
+            elif 290 <= x <= 390:  # Shuffle button (50 + 2*(100 + 20))
                 self.shuffle_board(10)
                 return
         
-        # Check tile clicks for manual moves
+        # Check tile clicks for manual moves (unchanged)
         if self.board_top <= y <= self.board_top + self.size * (self.tile_size + self.margin):
             click_row = (y - self.board_top) // (self.tile_size + self.margin)
             click_col = (x - 50) // (self.tile_size + self.margin)
@@ -212,7 +244,7 @@ class SlidingPuzzleGame:
                 
                 # Check if clicked tile is adjacent to empty space
                 if (abs(click_row - empty_row) == 1 and click_col == empty_col) or \
-                   (abs(click_col - empty_col) == 1 and click_row == empty_row):
+                (abs(click_col - empty_col) == 1 and click_row == empty_row):
                     
                     # Determine move direction
                     if click_row == empty_row - 1:
