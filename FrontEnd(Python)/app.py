@@ -1,16 +1,20 @@
+import datetime
 import pygame
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 import sys
+import time
 
 class SlidingPuzzleGame:
     def __init__(self, model_path):
         # Initialize pygame
         pygame.init()
-        self.width, self.height = 400, 800
+        self.ai_time = 0
+        self.memory_used_mb = 0
+        self.width, self.height = 400, 700
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("AI Sliding Puzzle")
+        pygame.display.set_caption("Sliding Puzzle")
         
         # Colors
         self.BG_COLOR = (240, 240, 240)
@@ -39,7 +43,7 @@ class SlidingPuzzleGame:
         self.empty_pos = (2, 2)
         self.moves = 0
         self.ai_prediction = None
-        self.shuffle_board(20)  # Shuffle the board
+        self.shuffle_board(80)  # Shuffle the board
         
     def shuffle_board(self, num_moves):
         """Shuffle the board with random moves"""
@@ -53,51 +57,87 @@ class SlidingPuzzleGame:
             if empty_col < self.size - 1: possible_moves.append('right')
             
             if possible_moves:
-                move = np.random.choice(possible_moves)
-                self.make_move(move)
+                nmove = np.random.choice(possible_moves)
+                self.make_move(nmove,True)
     
-    def make_move(self, move):
+    def make_move(self, move, shuffleMove=False):
         """Make a move on the board"""
         empty_row, empty_col = self.empty_pos
         
-        if move == 'up' and empty_row > 0:
-            self.board[empty_row, empty_col], self.board[empty_row - 1, empty_col] = \
-                self.board[empty_row - 1, empty_col], self.board[empty_row, empty_col]
-            self.empty_pos = (empty_row - 1, empty_col)
-            self.moves += 1
-            return True
-            
-        elif move == 'down' and empty_row < self.size - 1:
-            self.board[empty_row, empty_col], self.board[empty_row + 1, empty_col] = \
-                self.board[empty_row + 1, empty_col], self.board[empty_row, empty_col]
-            self.empty_pos = (empty_row + 1, empty_col)
-            self.moves += 1
-            return True
-            
-        elif move == 'left' and empty_col > 0:
-            self.board[empty_row, empty_col], self.board[empty_row, empty_col - 1] = \
-                self.board[empty_row, empty_col - 1], self.board[empty_row, empty_col]
-            self.empty_pos = (empty_row, empty_col - 1)
-            self.moves += 1
-            return True
-            
-        elif move == 'right' and empty_col < self.size - 1:
-            self.board[empty_row, empty_col], self.board[empty_row, empty_col + 1] = \
-                self.board[empty_row, empty_col + 1], self.board[empty_row, empty_col]
-            self.empty_pos = (empty_row, empty_col + 1)
-            self.moves += 1
-            return True
-            
+        if shuffleMove:
+            if move == 'up' and empty_row > 0:
+                self.board[empty_row, empty_col], self.board[empty_row - 1, empty_col] = \
+                    self.board[empty_row - 1, empty_col], self.board[empty_row, empty_col]
+                self.empty_pos = (empty_row - 1, empty_col)
+                return True
+                
+            elif move == 'down' and empty_row < self.size - 1:
+                self.board[empty_row, empty_col], self.board[empty_row + 1, empty_col] = \
+                    self.board[empty_row + 1, empty_col], self.board[empty_row, empty_col]
+                self.empty_pos = (empty_row + 1, empty_col)
+                return True
+                
+            elif move == 'left' and empty_col > 0:
+                self.board[empty_row, empty_col], self.board[empty_row, empty_col - 1] = \
+                    self.board[empty_row, empty_col - 1], self.board[empty_row, empty_col]
+                self.empty_pos = (empty_row, empty_col - 1)
+                return True
+                
+            elif move == 'right' and empty_col < self.size - 1:
+                self.board[empty_row, empty_col], self.board[empty_row, empty_col + 1] = \
+                    self.board[empty_row, empty_col + 1], self.board[empty_row, empty_col]
+                self.empty_pos = (empty_row, empty_col + 1)
+                return True
+        else:
+            if move == 'up' and empty_row > 0:
+                self.board[empty_row, empty_col], self.board[empty_row - 1, empty_col] = \
+                    self.board[empty_row - 1, empty_col], self.board[empty_row, empty_col]
+                self.empty_pos = (empty_row - 1, empty_col)
+                self.moves += 1
+                return True
+                
+            elif move == 'down' and empty_row < self.size - 1:
+                self.board[empty_row, empty_col], self.board[empty_row + 1, empty_col] = \
+                    self.board[empty_row + 1, empty_col], self.board[empty_row, empty_col]
+                self.empty_pos = (empty_row + 1, empty_col)
+                self.moves += 1
+                return True
+                
+            elif move == 'left' and empty_col > 0:
+                self.board[empty_row, empty_col], self.board[empty_row, empty_col - 1] = \
+                    self.board[empty_row, empty_col - 1], self.board[empty_row, empty_col]
+                self.empty_pos = (empty_row, empty_col - 1)
+                self.moves += 1
+                return True
+                
+            elif move == 'right' and empty_col < self.size - 1:
+                self.board[empty_row, empty_col], self.board[empty_row, empty_col + 1] = \
+                    self.board[empty_row, empty_col + 1], self.board[empty_row, empty_col]
+                self.empty_pos = (empty_row, empty_col + 1)
+                self.moves += 1
+                return True 
         return False
     
     def get_ai_prediction(self):
         """Get AI prediction for the current board state"""
+
+        tf.keras.backend.clear_session()
+        initial_allocated = tf.config.experimental.get_memory_info('GPU:0' if tf.test.is_gpu_available() else 'CPU:0')['current']
+        initial_allocated_mb = initial_allocated / 1024 / 1024
+
         # Flatten the board and one-hot encode
         flat_board = self.board.flatten()
         one_hot = np.eye(9)[flat_board].flatten().reshape(1, -1)
         
         # Get prediction
+        start_time = time.time()
         pred_probs = self.model.predict(one_hot, verbose=0)
+        end_time = time.time()
+        self.ai_time = end_time - start_time
+        final_allocated = tf.config.experimental.get_memory_info('GPU:0' if tf.test.is_gpu_available() else 'CPU:0')['current']
+        final_allocated_mb = final_allocated / 1024 / 1024
+        self.memory_used_mb = final_allocated_mb - initial_allocated_mb
+
         predicted_move_index = np.argmax(pred_probs[0])
         predicted_move = self.move_map[predicted_move_index]
         
@@ -125,7 +165,7 @@ class SlidingPuzzleGame:
         
         # Draw title
         font = pygame.font.Font(None, 36)
-        title = font.render("AI Sliding Puzzle", True, (0, 0, 0))
+        title = font.render("Sliding Puzzle", True, (0, 0, 0))
         self.screen.blit(title, (self.width // 2 - title.get_width() // 2, 10))
         
         # Draw board
@@ -159,6 +199,10 @@ class SlidingPuzzleGame:
             pred_font = pygame.font.Font(None, 24)
             move_text = pred_font.render(f"AI suggests: {self.ai_prediction['move']}", True, self.PREDICTION_COLOR)
             self.screen.blit(move_text, (200, moves_y))
+            move_time = pred_font.render(f"Time: {self.ai_time*1000:.2f}ms", True, self.PREDICTION_COLOR)
+            self.screen.blit(move_time,(200, moves_y+20))
+            move_memo = pred_font.render(f"Memory: {self.memory_used_mb}MB", True, self.PREDICTION_COLOR)
+            self.screen.blit(move_memo,(200, moves_y+40))
             
             # Draw probabilities below the AI suggestion
             prob_y = moves_y + 30
@@ -170,7 +214,7 @@ class SlidingPuzzleGame:
             
             prob_y += 25
             for move, prob in self.ai_prediction['probabilities'].items():
-                prob_text = pred_font.render(f"  {move}: {prob:.2f}", True, (0, 0, 0))
+                prob_text = pred_font.render(f"  {move}: {prob*100}%", True, (0, 0, 0))
                 self.screen.blit(prob_text, (prob_x, prob_y))
                 prob_y += 25
         
