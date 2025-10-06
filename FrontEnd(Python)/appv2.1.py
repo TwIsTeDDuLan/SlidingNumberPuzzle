@@ -555,14 +555,14 @@ class SlidingPuzzleGame:
                     self.screen.blit(text, text_rect)
         
         # Draw moves counter
-        moves_y = board_bottom + 20
+        moves_y = board_bottom - 150
         moves_text = font.render(f"Moves: {self.moves}", True, (0, 0, 0))
-        self.screen.blit(moves_text, (20, moves_y))
+        self.screen.blit(moves_text, (425, moves_y))
         
         # Draw AI prediction info
         if self.ai_prediction:
             pred_font = pygame.font.Font(None, 20)
-            ai_info_y = moves_y + 30
+            ai_info_y = board_bottom + 30
             
             # AI performance
             ai_perf_texts = [
